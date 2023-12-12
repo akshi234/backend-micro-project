@@ -1,15 +1,12 @@
 const express = require("express");
-const Router = express.Router();
-const bodyParser = require("body-parser");
+const router = express.Router();
+// const bodyParser = require("body-parser");
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-router.use(bodyParser.urlencoded({ extended: false }));
-router.use(bodyParser.json());
-
 //SIGNUP
-Router.post("/signup", async (req, res) => {
+router.post("/signup", async (req, res) => {
   try {
     const { fullName, email, password, age, gender, mobile } = req.body;
     const encryptedPassword = await bcrypt.hash(password, 10);
@@ -26,15 +23,16 @@ Router.post("/signup", async (req, res) => {
       data: "you have signed up  successfully",
     });
   } catch (error) {
+    console.error("Error", error);
     res.json({
       status: "FAILED",
-      message: "Something went wrong",
+      message: "something went wrong",
     });
   }
 });
 
 //Login
-app.post("/login", async (req, res) => {
+router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
@@ -70,4 +68,4 @@ app.post("/login", async (req, res) => {
   }
 });
 
-module.exports = Router;
+module.exports = router;

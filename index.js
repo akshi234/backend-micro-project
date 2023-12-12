@@ -1,13 +1,26 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const bodyParser = require("body-parser");
+const authRouter = require("./routes/auth");
+const weeklistRouter = require("./routes/weeklist");
+const authenticate = require("./middleware/authentication");
 dotenv.config();
 
 //EXPRESS APP
 const app = express();
 
-// app.use(bodyParser.urlencoded({ extended: false }));
-// app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+app.use("/auth", authRouter);
+app.use("/weeklist", weeklistRouter);
+app.get("/page", authenticate, (req, res) => {
+  res.json({
+    status: "active",
+    message: "running",
+  });
+});
 
 //health API
 app.get("/health", (req, res) => {
@@ -17,25 +30,6 @@ app.get("/health", (req, res) => {
     status: "active",
   });
 });
-
-//MIDDLEWARE
-// app.use((req, res, next) => {
-//   res.json({
-//     status: 404,
-//     error: "Route not found",
-//   });
-// });
-
-// app.get("/", (req, res) => {
-//   res.json({
-//     status: "SUCCESS",
-//     message: "All good",
-//   });
-// });
-
-// app.get("/dashboard", loggedIn, async (req, res) => {
-//   res.send("Welcome to Dashboard page");
-// });
 
 app.listen(process.env.PORT || 3000, () => {
   mongoose

@@ -1,4 +1,4 @@
-const jwttoken = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 
 const authenticate = (req, res, next) => {
@@ -10,9 +10,9 @@ const authenticate = (req, res, next) => {
   } catch (error) {
     res.json({
       status: "Failed",
-      message: "You have not loggedIn. Please  re-login",
+      message: "You have not loggedIn. Please re-login",
     });
   }
 };
 
-module.exports = { authenticate };
+module.exports = authenticate;
