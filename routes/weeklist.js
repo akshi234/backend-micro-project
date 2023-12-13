@@ -1,6 +1,5 @@
-const Weeklist = require("../models/weeklist");
+const Weeklist = require("../models/weekList");
 const express = require("express");
-// const bodyParser = require("body-parser");
 const router = express.Router();
 
 // API to add a week list
@@ -13,8 +12,6 @@ router.post("/api/weeklist", (req, res) => {
     updatedAt: now,
     completedTasks: [],
   };
-
-  // Check if the user has more than two active week lists
   if (Weeklist.filter((list) => !list.completedAt).length >= 2) {
     return res
       .status(400)
@@ -37,14 +34,12 @@ router.put("/api/weeklist/:id", (req, res) => {
   const currentTime = new Date();
   const timeDifference = currentTime - updatedWeekList.createdAt;
 
-  // Check if 24 hours have passed since the week list was created
   if (timeDifference > 24 * 60 * 60 * 1000) {
     return res
       .status(400)
       .json({ error: "Cannot update or delete the week list after 24 hours." });
   }
 
-  // Update description/task or delete the week list
   if (req.body.description) {
     updatedWeekList.description = req.body.description;
   }
@@ -63,7 +58,7 @@ router.put("/api/weeklist/:id", (req, res) => {
 });
 
 // API to mark/unmark a task in the week list
-router.patch("/api/weeklist/:id/mark-task/:taskId", (req, res) => {
+router.post("/api/weeklist/:id/mark-task/:taskId", (req, res) => {
   const weekListId = parseInt(req.params.id);
   const taskId = parseInt(req.params.taskId);
   const weekList = weekLists.find((list) => list.id === weekListId);
@@ -88,8 +83,6 @@ router.patch("/api/weeklist/:id/mark-task/:taskId", (req, res) => {
   } else {
     weekList.completedTasks.push(taskId);
   }
-
-  // Save the time the task was marked true
   weekList.tasks[taskIndex].completedAt = isTaskCompleted ? null : currentTime;
 
   res.status(200).json(weekList);
@@ -113,10 +106,29 @@ router.get("/api/weeklists", (req, res) => {
   res.status(200).json(weekListsInfo);
 });
 
-// Middleware to check if the week list is still active or completed
+//feed API
+router.get("/api/feed", (req, res) => {
+  const currentTime = new Date();
+
+  const activeWeekLists = Weeklist.filter((weekList) => {
+    const timeDifference = currentTime - weekList.createdAt;
+    return timeDifference <= 24 * 60 * 60 * 1000 && !weekList.isCompleted;
+  });
+
+  const feedInfo = activeWeekLists.map((weekList) => {
+    return {
+      id: weekList.id,
+      tasks: weekList.tasks,
+    };
+  });
+
+  res.status(200).json(feedInfo);
+});
+
+// Middleware
 const checkWeekListStatus = (req, res, next) => {
   const weekListId = parseInt(req.params.id);
-  const weekList = weekLists.find((list) => list.id === weekListId);
+  const weekList = Weeklist.find((list) => list.id === weekListId);
 
   if (!weekList) {
     return res.status(404).json({ error: "Week list not found." });
@@ -126,37 +138,15 @@ const checkWeekListStatus = (req, res, next) => {
   const timeDifference = currentTime - weekList.createdAt;
 
   if (timeDifference > 24 * 60 * 60 * 1000) {
-    // If more than 24 hours have passed, mark the week list as inactive
     weekList.status = "inactive";
+    weekList.isCompleted = true;
   }
 
   if (weekList.isCompleted) {
-    // If the week list is completed, lock it
     weekList.locked = true;
   }
 
   next();
 };
-
-// API to mark/unmark a task in the week list
-app.patch(
-  "/api/weeklist/:id/mark-task/:taskId",
-  checkWeekListStatus,
-  (req, res) => {
-    const weekListId = parseInt(req.params.id);
-    const taskId = parseInt(req.params.taskId);
-    const weekList = weekLists.find((list) => list.id === weekListId);
-
-    if (weekList.locked) {
-      return res
-        .status(400)
-        .json({ error: "Cannot unmark tasks in a completed week list." });
-    }
-
-    // ... (existing logic for marking/unmarking tasks)
-
-    res.status(200).json(weekList);
-  }
-);
 
 module.exports = router;

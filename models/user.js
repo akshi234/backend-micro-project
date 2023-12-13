@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const User = new mongoose.Schema( {
+const User = new mongoose.Schema({
   fullName: {
     type: String,
     required: true,
@@ -26,6 +26,14 @@ const User = new mongoose.Schema( {
 
   mobile: {
     type: Number,
+  },
+  createdAt: {
+    type: Date,
+    default: () => Date.now(),
+  },
+  updatedAt: {
+    type: Date,
+    default: () => Date.now(),
   },
 });
 

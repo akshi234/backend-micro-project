@@ -1,15 +1,39 @@
 const mongoose = require("mongoose");
 
-const WeekListSchema = new mongoose.Schema({
+const TaskSchema = new mongoose.Schema({
   desc: {
     type: String,
     required: true,
   },
-
   checked: {
     type: Boolean,
     required: true,
   },
+  completedAt: {
+    type: Date,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now(),
+    immutable: true,
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now(),
+  },
 });
 
-module.exports = new mongoose.model("weeklist", WeekListSchema);
+const WeekListSchema = new mongoose.Schema({
+  tasks: [TaskSchema],
+  createdAt: {
+    type: Date,
+    default: Date.now(),
+    immutable: true,
+  },
+  status: {
+    type: String,
+    enum: ["active", "inactive", "completed"],
+  },
+});
+
+module.exports = mongoose.model("WeekList", WeekListSchema);
