@@ -4,6 +4,7 @@ const router = express.Router();
 
 // API to add a week list
 router.post("/api/weeklist", (req, res) => {
+  console.log("Received POST request at /api/weeklist");
   const now = new Date();
   const newWeekList = {
     id: Weeklist.length + 1,
@@ -58,7 +59,7 @@ router.put("/api/weeklist/:id", (req, res) => {
 });
 
 // API to mark/unmark a task in the week list
-router.post("/api/weeklist/:id/mark-task/:taskId", (req, res) => {
+router.post("/api/weeklist/:id/marktask/:taskId", (req, res) => {
   const weekListId = parseInt(req.params.id);
   const taskId = parseInt(req.params.taskId);
   const weekList = weekLists.find((list) => list.id === weekListId);
